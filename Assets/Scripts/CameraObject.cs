@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -11,6 +12,7 @@ namespace GT.Hotfix
         private GameObject m_RtBeijing;
         private Image m_RtImage;
         private RawImage m_RawImage;
+        public TextMeshProUGUI m_MsgText;
 
         protected void Awake()
         {
@@ -38,9 +40,14 @@ namespace GT.Hotfix
             }
 
             var random = Random.Range(0, 100000);
-            var savepath = Application.persistentDataPath + $"/CameraRender{random}.png";
-            CameraUtility.SaveCameraRender(m_RtCamera, savepath);
+            // var savepath = Application.persistentDataPath + 
+            var fileName = $"CameraRender{random}.png";
+            CameraUtility.SaveCameraRender(m_RtCamera, fileName, (success, path) =>
+            {
+                var msg = "Result: " + success + " " + path;
+                Debug.Log(msg);
+                m_MsgText.text = msg;
+            });
         }
-
     }
 }

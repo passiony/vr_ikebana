@@ -9,23 +9,24 @@ namespace GT.Hotfix
     {
         public static RenderTexture SetCameraRender(Camera camera, int width = 1024, int height = 2018)
         {
-            var rt = RenderTexture.GetTemporary(width, height, 16, RenderTextureFormat.ARGB32,RenderTextureReadWrite.sRGB);
+            var rt = RenderTexture.GetTemporary(width, height, 16, RenderTextureFormat.ARGB32,
+                RenderTextureReadWrite.sRGB);
 
             camera.targetTexture = rt;
             camera.Render();
 
             return rt;
         }
-        
-        public static void SaveCameraRender(Camera camera, string saverPath)
+
+        public static void SaveCameraRender(Camera camera, string saverPath, Action<bool, string> callback)
         {
             var rt = camera.targetTexture;
             camera.Render();
-            SaveRenderTexture(rt, saverPath);
+            SaveRenderTexture(rt, saverPath, callback);
 
             // RenderTexture.ReleaseTemporary(rt);
         }
-        
+
         /// <summary>
         /// 保存相机渲染图片到本地
         /// </summary>
@@ -35,11 +36,12 @@ namespace GT.Hotfix
         /// <param name="height"></param>
         public static void SaveCameraRender(Camera camera, string saverPath, int width, int height)
         {
-            var rt = RenderTexture.GetTemporary(width, height, 16, RenderTextureFormat.ARGB32,RenderTextureReadWrite.sRGB);
+            var rt = RenderTexture.GetTemporary(width, height, 16, RenderTextureFormat.ARGB32,
+                RenderTextureReadWrite.sRGB);
 
             camera.targetTexture = rt;
             camera.Render();
-            SaveRenderTexture(rt, saverPath);
+            SaveRenderTexture(rt, saverPath, null);
 
             RenderTexture.ReleaseTemporary(rt);
         }
@@ -49,11 +51,12 @@ namespace GT.Hotfix
         /// </summary>
         /// <param name="rt"></param>
         /// <param name="savePath"></param>
-        public static void SaveRenderTexture(RenderTexture rt, string savePath)
+        /// <param name="callback"></param>
+        public static void SaveRenderTexture(RenderTexture rt, string savePath, Action<bool, string> callback)
         {
             RenderTexture active = RenderTexture.active;
             RenderTexture.active = rt;
-            
+
             Texture2D png = new Texture2D(rt.width, rt.height, TextureFormat.ARGB32, false);
             png.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
             png.Apply();
@@ -61,15 +64,15 @@ namespace GT.Hotfix
             RenderTexture.active = active;
 
             byte[] bytes = png.EncodeToPNG();
-            FileStream fs = File.Open(savePath, FileMode.Create);
-            BinaryWriter writer = new BinaryWriter(fs);
-            writer.Write(bytes);
-            writer.Flush();
-            writer.Close();
-            fs.Close();
+            NativeGallery.SaveImageToGallery(bytes, "Quest", savePath, (x, y) => { callback?.Invoke(x, y); });
+            // FileStream fs = File.Open(savePath, FileMode.Create);
+            // BinaryWriter writer = new BinaryWriter(fs);
+            // writer.Write(bytes);
+            // writer.Flush();
+            // writer.Close();
+            // fs.Close();
+            // Debug.Log("保存成功！" + savePath);
             Object.Destroy(png);
-
-            Debug.Log("保存成功！" + savePath);
         }
 
 

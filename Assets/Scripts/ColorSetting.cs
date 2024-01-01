@@ -27,6 +27,11 @@ public class ColorSetting : MonoBehaviour
             return;
         }
 
+        for (int i = 2; i < transform.childCount; i++)
+        {
+            Destroy(transform.GetChild(i).gameObject);
+        }
+        
         foreach (var color in rose.m_Colors)
         {
             var btn = GameObject.Instantiate(m_ColorMenu, transform);
